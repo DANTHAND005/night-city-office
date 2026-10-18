@@ -1,0 +1,14 @@
+# secrets and local state
+.env
+config.yaml
+.venv/
+__pycache__/
+*.pyc
+*.log
+*.err
+dashboard/tasks.db*
+node_modules/
+tools/three-vendor/node_modules/
+desktop_app.json
+test.png
+.impeccable/hook.cache.json

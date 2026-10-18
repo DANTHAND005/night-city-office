@@ -1,0 +1,39 @@
+The hub is built and the playtest went through without game script errors. I didn't change any scripts, so no backups were needed. Studio is back in Edit mode and `Config.USE_MOCK_IN_STUDIO` is still false.
+
+**What I built in `Workspace.Hub`:** 212 parts, all anchored and tagged `HubStatic`.
+
+| Area | Parts | What's there |
+|---|---|---|
+| Plaza | 4 | Stone disk with a curb and inner rings. SpawnLocation and ShopStall sit on it (raised 1.2 studs; both are still at the Workspace root). |
+| Paths | 2 | One east to the portal area, one west to the cave. |
+| Stalls | 2 | `StallSpot_1..2`, wooden platforms on either side of the shop. |
+| Portals | 11 | A stone platform, `PortalPad_1..3` (also tagged `PortalPad`, not functional yet) and an arch over each pad. |
+| Lanterns | 48 | 16 lanterns, each with a light. |
+| Nature | 39 | 13 trees. |
+| Boundary | 77 | Low stone wall, an invisible wall 60 studs high, an invisible ceiling and Terrain rock cliffs around the edge. |
+| Cave | 29 | Wooden entrance frame, a tunnel with 4 lit supports, a chamber floor, 8 glowing crystals with lights and a centre lamp. |
+
+- **Terrain:** grass across the hub (bare ground under paved areas so grass blades don't poke through), a rock mass with the tunnel and chamber carved out, and a ring of cliffs.
+- **Ore rocks:** `Workspace.HubRocks` now has 12 rocks in the chamber. The 6 originals were moved in and 6 new ones (`Rock_7..12`) were cloned from them, keeping the `HubRock` tag and `RockId` attribute. There are 4 each of stone, coal and iron, with the iron furthest from the tunnel.
+- **Baseplate:** I moved it down to y=-16 so it doesn't overlap the grass surface.
+
+**Hub guard script:** not needed. MiningServer only accepts parts tagged `HubRock` or parts named `Block` inside an island model. IslandServer only allows placing on an island under `Workspace.Islands`, within its bounds.
+
+**Test results:**
+- In a playtest, MiningServer set up all 12 rocks with full health.
+- The game normally puts players on their island at (200, 13, 0). I moved the character to the plaza, and the navigation tool walked it into the chamber, arriving at (-109, 4, 0).
+- I ran MiningServer's targeting rule against all 212 hub parts: none count as mineable.
+- I fired `MineStrike` at the plaza floor and tunnel floor; both were untouched.
+- The console showed only Roblox's own UI warnings.
+
+**What the screenshots showed:**
+- **Plaza:** a round cobblestone plaza with a star medallion in the centre, the shop and the two stall platforms, lanterns, trees, cliffs behind and the cave mouth to the west.
+- **Portal area:** a slate platform with three purple pads under three separate arches.
+- **Cave:** a lit entrance frame and cobbled path; inside, the rocks in their stone, coal and iron colours with crystals on the walls. The chamber looked bright in the last shot, so I turned the centre lamp down but didn't take another screenshot.
+
+**Not verified:**
+- A real mining strike with a pickaxe equipped: the test player had no tool, so the server rejected those strikes before checking the target.
+- How the scene looks with in-game lighting rather than the edit view.
+- Whether a player can climb out over the cliffs. There's no gap in the walls on paper, but I didn't test it in play.
+
+Players spawn on their islands and there's currently no way to walk from an island into the walled hub; that waits on the portals.

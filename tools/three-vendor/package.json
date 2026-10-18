@@ -1,0 +1,1 @@
+{"name":"three-vendor","private":true,"description":"Pins three.js for dashboard/static/vendor; not served.","dependencies":{"three":"0.169.0"}}

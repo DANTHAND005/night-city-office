@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>A · Access Control — Cyberpunk Arasaka Tower Office</title>
+<style>
+@font-face { font-family: "VT323"; src: url("../../../dashboard/static/fonts/VT323-Regular.ttf"); }
+:root { --ground:#1b1c20; --panel:#24262b; --line:#34373e; --ink:#eceae5; --mut:#9a9893; --red:#d7192a; --blue:#3d74a8;
+  --card:#f3f1ec; --cardink:#17181b; --ok:#2fbf5b; --amb:#e8a317; --off:#6d6e72; --sans:"Segoe UI",system-ui,sans-serif; }
+* { box-sizing:border-box; } html,body { margin:0; width:1440px; height:900px; overflow:hidden; }
+body { background:var(--ground); color:var(--ink); font:14px/1.35 var(--sans); display:grid; grid-template-columns:8px 1fr; }
+.rail { background:var(--red); }
+.page { display:grid; grid-template-rows:52px 300px 1fr; min-width:0; }
+header { display:flex; align-items:center; gap:18px; padding:0 22px; border-bottom:1px solid var(--line); }
+h1 { margin:0; font:700 15px var(--sans); letter-spacing:.28em; text-transform:uppercase; }
+.code { font-family:"VT323",monospace; font-size:20px; }
+header .sub { color:var(--mut); } .live { margin-left:auto; color:var(--ok); border:1px solid var(--ok); padding:0 8px; }
+/* signature: two badge racks, the busy badge pulled into its reader */
+.floors { display:grid; grid-template-columns:2fr 3fr; gap:18px; padding:16px 22px; border-bottom:1px solid var(--line); }
+.rack { background:var(--panel); border:1px solid var(--line); padding:10px 14px 14px; }
+.rack h2 { display:flex; gap:10px; align-items:baseline; margin:0 0 10px; font:600 12px var(--sans); letter-spacing:.2em; color:var(--mut); }
+.rack h2 .code { color:var(--ink); } .rack h2 .q { margin-left:auto; }
+.badges { display:flex; gap:12px; align-items:flex-end; height:226px; }
+.badge { width:150px; height:196px; background:var(--card); color:var(--cardink); border-radius:6px; position:relative; overflow:hidden;
+  display:flex; flex-direction:column; box-shadow:0 1px 0 #0006; }
+.badge .stripe { height:18px; background:var(--dept); color:#fff; font:600 11px var(--sans); letter-spacing:.16em; padding:2px 8px; }
+.badge .ph { margin:10px 10px 6px; height:62px; background:var(--tone); display:grid; place-items:center; font:34px "VT323"; color:#fff; }
+.badge .nm { padding:0 10px; font:700 16px var(--sans); letter-spacing:.04em; text-transform:uppercase; }
+.badge .rl { padding:0 10px; color:#55565a; font-size:12px; }
+.badge .id { margin-top:auto; display:flex; justify-content:space-between; align-items:center; padding:6px 10px; border-top:1px solid #d9d6cf; font:17px "VT323"; }
+.lamp { width:10px; height:10px; border-radius:50%; background:var(--lc); border:2px solid #0003; }
+.pc { --dept:var(--red); } .lap { --dept:var(--blue); }
+.badge.reading { height:222px; transform:translateY(-2px); outline:2px solid var(--ok); outline-offset:3px; }
+.reader { margin:2px 10px 0; padding:4px 6px; background:var(--cardink); color:var(--ok); font:16px/1.1 "VT323"; }
+.badge.gray { filter:grayscale(1); opacity:.55; }
+/* work area: standard form + four columns */
+.work { display:grid; grid-template-columns:360px 1fr; gap:18px; padding:16px 22px; min-height:0; }
+.panel { background:var(--panel); border:1px solid var(--line); padding:14px; }
+.panel h3, .col h3 { margin:0 0 10px; font:600 12px var(--sans); letter-spacing:.2em; color:var(--mut); }
+label { display:block; margin-bottom:9px; color:var(--mut); font-size:12px; }
+.in { display:block; width:100%; margin-top:3px; padding:6px 8px; background:#18191c; border:1px solid var(--line); color:var(--ink); font:13px var(--sans); }
+.ta { height:92px; font:12px Consolas,monospace; color:#c8c6c0; }
+.row { display:flex; gap:8px; } .row label { flex:1; }
+.btn { background:var(--red); color:#fff; border:0; padding:8px 16px; font:700 12px var(--sans); letter-spacing:.2em; }
+.ghost { color:var(--mut); border:1px dashed var(--line); padding:3px 9px; font-size:12px; }
+.board { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; min-height:0; }
+.col { background:var(--panel); border:1px solid var(--line); border-top:3px solid var(--c); padding:10px; overflow:hidden; }
+.col h3 { display:flex; justify-content:space-between; color:var(--c); } .col h3 .code { font-size:18px; }
+.t { background:#1d1e22; border:1px solid var(--line); padding:7px 9px; margin-bottom:7px; }
+.t .m { display:flex; gap:8px; color:var(--mut); font:16px "VT323"; } .t .m .r { margin-left:auto; }
+.t .ti { font-size:13px; } .t .ch { color:#7fb0dd; font-size:12px; margin-top:2px; }
+.fail { background:var(--red); border-color:var(--red); color:#fff; } .fail .m { color:#fff; }
+.fail .e { font:12px Consolas,monospace; margin-top:3px; }
+.note { position:absolute; right:22px; bottom:6px; color:#8f8d88; font-size:12px; }
+</style></head><body>
+<div class="rail"></div>
+<div class="page">
+<header><h1>Cyberpunk Arasaka Tower Office</h1><span class="code sub">local crew // 127.0.0.1:8080</span><span class="code live">LIVE</span></header>
+<section class="floors">
+  <div class="rack"><h2>PC FLOOR <span class="code">41</span> · GPU · ONE AT A TIME <span class="q code">QUEUE 1</span></h2>
+    <div class="badges">
+      <div class="badge pc reading"style="--tone:#c4552f;--lc:var(--ok)"><div class="stripe">PC · PLANNING</div><div class="ph">M</div><div class="nm">Maine</div><div class="rl">planner · qwen3:8b</div><div class="reader">▶ #14 Plan a sword shop<br>00:41</div><div class="id"><span>AR-41-002</span><span class="lamp"></span></div></div>
+      <div class="badge pc" style="--tone:#b4568f;--lc:var(--off)"><div class="stripe">PC · ENGINEERING</div><div class="ph">L</div><div class="nm">Lucy</div><div class="rl">coder · qwen2.5-coder:7b</div><div class="id"><span>AR-41-001</span><span class="lamp" style="--lc:var(--red)"></span></div></div>
+    </div></div>
+  <div class="rack"><h2>LAPTOP FLOOR <span class="code">07</span> · 192.168.x.x · ONE AT A TIME <span class="q code">QUEUE 0</span></h2>
+    <div class="badges">
+      <div class="badge lap reading"style="--tone:#3e8d47;--lc:var(--ok)"><div class="stripe">LAPTOP · OPTICS</div><div class="ph">R</div><div class="nm">Rebecca</div><div class="rl">vision · qwen3-vl:4b</div><div class="reader">▶ #13 Read the screenshot<br>00:18</div><div class="id"><span>AR-07-003</span><span class="lamp"></span></div></div>
+      <div class="badge lap" style="--tone:#8a7b55;--lc:var(--off)"><div class="stripe">LAPTOP · RECORDS</div><div class="ph">K</div><div class="nm">Kiwi</div><div class="rl">memory · memory-cpu</div><div class="id"><span>AR-07-004</span><span class="lamp"></span></div></div>
+      <div class="badge lap" style="--tone:#7a5236;--lc:var(--off)"><div class="stripe">LAPTOP · EDITING</div><div class="ph">F</div><div class="nm">Falco</div><div class="rl">trimmer · trimmer-cpu</div><div class="id"><span>AR-07-005</span><span class="lamp"></span></div></div>
+      <div class="badge" style="--dept:#8b6d12;--tone:#a88a1c;--lc:var(--amb)"><div class="stripe">CLOUD · DIRECTOR</div><div class="ph">D</div><div class="nm">David</div><div class="rl">claude-code · on call</div><div class="id"><span>AR-00-001</span><span class="lamp"></span></div></div>
+      <div class="badge gray" style="--dept:#555;--tone:#666;--lc:var(--off)"><div class="stripe">SERVER RACK</div><div class="ph">H</div><div class="nm">Hermes</div><div class="rl">not configured</div><div class="id"><span>AR-XX-000</span><span class="lamp"></span></div></div>
+    </div></div>
+</section>
+<section class="work">
+  <div class="panel"><h3>ASSIGN A TASK</h3>
+    <div class="row"><label>Role<span class="in">Lucy — coder</span></label><label style="flex:.6">Timeout<span class="in">300 s</span></label></div>
+    <label>Title <span style="opacity:.7">optional</span><span class="in">Fix the shop's price rounding</span></label>
+    <label>Input<span class="in ta">prices show 9.999 in the sword shop UI; round to 2 places when displaying and add a test</span></label>
+    <label>Then hand the result to…<span class="in">1 · Falco — trimmer: summarize the change</span></label>
+    <div class="row" style="align-items:center"><span class="ghost">+ then…</span><span style="margin-left:auto;color:var(--mut);font-size:12px">Ctrl+Enter</span><span class="btn">QUEUE TASK</span></div>
+  </div>
+  <div class="board">
+    <div class="col" style="--c:var(--mut)"><h3>QUEUED <span class="code">1</span></h3>
+      <div class="t"><div class="m"><span>#15</span><span>planner</span><span class="r">waits for PC</span></div><div class="ti">Shop bug: trim → plan → code</div><div class="ch">step 2 of 3 · from Falco · after Maine's #14</div></div></div>
+    <div class="col" style="--c:var(--ok)"><h3>RUNNING <span class="code">2</span></h3>
+      <div class="t"><div class="m"><span>#14</span><span>planner</span><span class="r">00:41</span></div><div class="ti">Plan a sword shop</div></div>
+      <div class="t"><div class="m"><span>#13</span><span>vision</span><span class="r">00:18</span></div><div class="ti">Read the screenshot</div></div></div>
+    <div class="col" style="--c:#cfcdc7"><h3>DONE <span class="code">9</span></h3>
+      <div class="t"><div class="m"><span>#11</span><span>coder</span><span class="r">2.4s</span></div><div class="ti">Plan a sword shop → coder</div></div>
+      <div class="t"><div class="m"><span>#9</span><span>planner</span><span class="r">33.3s</span></div><div class="ti">Shop bug: trim → plan → code → planner</div></div>
+      <div class="t"><div class="m"><span>#6</span><span>trimmer</span><span class="r">12.3s</span></div><div class="ti">Shop bug: trim → plan → code</div></div>
+      <div class="t"><div class="m"><span>#4</span><span>memory</span><span class="r">14.8s</span></div><div class="ti">Summarize setup session</div></div></div>
+    <div class="col" style="--c:#ff6b70"><h3>FAILED <span class="code">3</span></h3>
+      <div class="t fail"><div class="m"><span>#12</span><span>coder</span><span class="r">1.3s</span></div><div class="ti">Timeout test (1 s)</div><div class="e">timed out after 1 s waiting for the coder model</div></div>
+      <div class="t"><div class="m"><span>#8</span><span>coder</span><span class="r">—</span></div><div class="ti">Cancel me</div></div></div>
+  </div>
+</section>
+</div>
+<div class="note">MOCKUP · sample data · VT323 by Peter Hull, SIL OFL 1.1</div>
+</body></html>

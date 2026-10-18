@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Crew models — Cyberpunk Arasaka Tower Office</title>
+<style>
+@font-face { font-family: "VT323"; src: url("../../../dashboard/static/fonts/VT323-Regular.ttf"); }
+body { margin:0; padding:28px; background:#0d1028; color:#e8e9f5; font:14px/1.4 "Segoe UI",system-ui,sans-serif; width:1440px; box-sizing:border-box; }
+h1 { margin:0 0 4px; font:36px "VT323"; color:#f5d300; } .sub { color:#a3a9d1; margin:0 0 22px; }
+.grid { display:grid; grid-template-columns:repeat(6,1fr); gap:16px; }
+.card { background:#151a3c; border:1px solid #2b3366; padding:14px; }
+canvas { width:100%; image-rendering:pixelated; background:#0a0d22; display:block; }
+.nm { font:30px/1 "VT323"; margin-top:10px; } .rl { color:#a3a9d1; } .wk { margin-top:6px; font-size:13px; }
+.wk b { color:#05d9e8; font-weight:600; }
+#err { color:#ff6b70; font:18px "VT323"; }
+</style></head><body>
+<h1>CREW MODELS · v1</h1>
+<p class="sub">Chibi pixel redesigns after your reference picture: idle pose on the left, working pose on the right. MOCKUP.</p>
+<div id="err"></div>
+<div class="grid" id="grid"></div>
+<script src="sprites.js"></script>
+<script>
+document.getElementById('err').textContent = spriteProblems().join(' · ');
+const grid = document.getElementById('grid');
+for (const [id, c] of Object.entries(CREW)) {
+  const card = document.createElement('div'); card.className = 'card';
+  const cv = document.createElement('canvas'); cv.width = 50; cv.height = 30;
+  const ctx = cv.getContext('2d');
+  drawSprite(ctx, id, 12, 27);
+  const info = drawSprite(ctx, id, 36, 27);
+  if (c.work === 'laptop') drawLaptop(ctx, 36, 25, id === 'rebecca' ? '#9cff4a' : '#05d9e8');
+  else if (c.work === 'jack-in') drawJackIn(ctx, info, { x: 48, y: 27 }, id === 'kiwi' ? '#ff3a5c' : '#05d9e8');
+  else { ctx.globalAlpha = .6; ctx.fillStyle = '#05d9e8'; ctx.fillRect(28, 1, 16, 3); ctx.globalAlpha = 1; }
+  card.append(cv);
+  card.insertAdjacentHTML('beforeend', `<div class="nm">${c.name}</div><div class="rl">${c.role} · ${c.model}</div>
+    <div class="wk">works by <b>${c.work}</b></div>`);
+  grid.append(card);
+}
+</script>
+</body></html>

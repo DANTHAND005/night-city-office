@@ -1,0 +1,37 @@
+All three tasks are done. Studio is back in Edit mode and `USE_MOCK_IN_STUDIO` is false again, checked in the source.
+
+**Task 1: why the profile "never loaded".** The profile did load. The problem was in how the last test checked it, not in Studio settings, the session lock or our code, so I changed nothing.
+- **Settings:** the console prints `[ProfileStore]: Roblox API services available - data will be saved`, so Studio API access to DataStores is already on. The owner doesn't need to enable anything.
+- **Proof it loaded:** in a real-store playtest the player had `Coins=100`, `Mat_Wood=9`, `Mat_Stone=10` and a WoodPickaxe in the Backpack. The DataStore record's `ActiveSession` was this session, so there was no lock conflict.
+- **Cause:** calling `require()` from `execute_luau` gives you a separate copy of the module, so `PlayerData.Get` returns nil there even when the game's copy has the profile. To check live game state, I created temporary Scripts during the playtest instead; they disappear when it stops.
+
+**Task 2: mock playtest.** I backed up Config as `Config_backup_2026-10-17`, then set the flag to true.
+- **Mock profile:** it started from the template: no items, Wood=20, Stone=10, no tools. The real save has `WoodPickaxe=2`, so the pickaxe came only from the mock.
+- **Pickaxe:** the client crafted WoodPickaxe and equipped it. Wood went 20 → 15, then 14 after placing one block.
+- **Mining a block:** the owner placed a block at (208,16,0). It broke after 4 strikes (health 3, 2, 1, gone) and Stone went 10 → 11.
+- **Mining a HubRock:** Rock_1 (stone_rock) was depleted after 6 strikes and Stone went 11 → 14 (+3). The profile ended with Wood=14, Stone=14, WoodPickaxe=1 and 5 audit-log entries.
+- **The real DataStore was untouched:** it still reads Wood=9, Stone=10.
+- **Permissions, real module:**
+  - The owner can Place on their own island.
+  - With the owner offline, the player is a visitor and can't Place.
+  - Blocking user 12345 works. Blocking the co-owner (777) removes them as co-owner, and setting them as co-owner again unblocks them.
+  - Blocking yourself is rejected.
+- **Blocked user and co-owner checks:** Studio only gives you one player, so these used a test-only copy of Permissions where only the owner lookup was faked.
+  - A blocked UserId is rejected: role `blocked`, and Enter, Place and Mine are all false.
+  - A co-owner can Place: role `coowner`, Place and Break are true, Manage is false.
+
+**Task 3: recipes.** I backed up Recipes as `Recipes_backup_2026-10-17`, then added four recipes in the existing pattern, with placeholder costs:
+
+| Tool | Cost |
+|---|---|
+| StonePickaxe | Wood 3, Stone 5 |
+| IronPickaxe | Wood 3, IronOre 5 |
+| WoodAxe | Wood 5 |
+| IronAxe | Wood 3, IronOre 5 |
+
+There are now 8 recipes and every tool in ItemData has one. WoodSword and StoneHammer have recipes but aren't in ItemData, so they can be crafted but can't mine; I left them as they were.
+
+**Still unverified:**
+- A real two-player test of the blocked user and co-owner, including a co-owner actually placing a block through the PlaceBlock remote.
+- Crafting the four new recipes in play. Only WoodPickaxe was crafted.
+- Saving to the real DataStore across a rejoin.

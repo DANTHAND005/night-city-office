@@ -1,0 +1,34 @@
+Build E is in and working, with one gap: the tool swing compiles but I couldn't test it. I wasn't given permission to send mouse input, so the click that triggers it never ran.
+
+**What changed**
+- **`ReplicatedStorage.Shared.BlockData` (new):** colour and Roblox material for grass (Grass), dirt (Ground), stone_block (Slate), coal_ore and iron_ore (Cobblestone) and wood_plank (WoodPlanks). Health is read from ItemData. All values are marked PLACEHOLDER.
+  - "stone" uses the existing `stone_block` id, so it stays the default block.
+  - I used WoodPlanks rather than plain Wood for the planks.
+- **ItemData:** added mining stats and drops for the 5 new block ids. Without them MiningServer rejects those blocks as unknown. Drops only use existing materials (Stone, Coal, IronOre, Wood).
+- **IslandServer:**
+  - All blocks now go through one `makeBlock` that applies the BlockData look.
+  - The base is coloured as dirt, with a thin grass "Surface" part on top. That part is decoration, not a Block.
+  - Each new island gets 13 starter blocks: grass over dirt, stone, 2 coal and 1 iron, through the same server tracking as placed blocks.
+  - PlaceBlock takes an optional third argument, the block id. It defaults to stone_block, and only stone_block and wood_plank are accepted. All existing checks and the Wood cost are unchanged. Restricting it stops players placing ore blocks for 1 Wood and mining them back for iron.
+- **MiningServer:** sends one new event, `Remotes.BlockFX` (position + BlockId only), when a block breaks. I needed it because the client never sees Health reach 0: the block is destroyed in the same frame. There's no separate rate limit; it only fires on a strike that passed the server's per-player cooldown.
+- **`BlockFX` LocalScript (new):** a pop when a block is placed, a small shake when its Health drops, and 8 particles in the block's colour when it breaks, cleaned up after 1.5s. There are no sounds, because I couldn't confirm any sound IDs are Roblox-owned.
+- **MiningClient:** after each accepted click it swings the right shoulder joint. The tools have no Handle, so I moved the arm instead. It uses the same client cooldown as before, and only the local player sees it.
+
+**Backups** (in `ServerStorage.Backups`): `IslandServer_`, `ItemData_`, `MiningClient_`, `MiningServer_` and `Config_backup_2026-10-17_buildE`.
+
+**Tests**
+- All scripts compile.
+- I set mock to true for the playtest. Afterwards I set it back to false and confirmed Config matches its backup exactly. Studio is in Edit mode.
+- All 6 block ids were on my island: 5 from the starter build and 2 placed with PlaceBlock, which charged 2 Wood. Placing grass or a junk value was rejected.
+- Real mining with a crafted WoodPickaxe broke a grass block in 2 strikes, and the client spawned green particles at it.
+- I confirmed the shake moves the block and returns it to its position.
+- The console showed no script errors, only Roblox core UI warnings.
+
+**Screenshots seen:** two of the island. The grass-over-dirt cluster, grey slate stone, dark coal, tan iron ore and the plank block all looked right.
+
+**Not verified**
+- The swing (no mouse input). The 100° rotation direction is a guess.
+- Whether a blank particle texture really draws square bits.
+- The place pop visually; I only checked it ends at full size.
+
+Islands aren't saved, so each rejoin rebuilds the 3 starter ore blocks. That's a small repeatable ore source, less than the hub rocks already give.

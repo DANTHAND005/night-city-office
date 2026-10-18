@@ -1,0 +1,18 @@
+I built the four frames on a new "UI v1" page in file ZpSOZ79EbNrdhzDpu2cin6, and nothing else in the file was touched. I never saw the rendered images: the screenshot tool only returned download links. I checked layout through geometry instead, so please look at the frames in Figma.
+
+| # | Frame name | Node id | Notes |
+|---|---|---|---|
+| 1 | `Shop Panel` | `4:3` | Header with the coin chip (`CoinDisplay`). Left column `SellColumn` has rows Wood, Stone, Coal and IronOre, each with a price and a `Btn SellAll …` button. Right column `BuyColumn` has six `ToolCard …` cards in two rows of three, each with a price and a Buy or Owned button. WoodAxe is shown as Owned, with a green outline. |
+| 2 | `Permissions Panel` | `4:81` | Title and a "Press P to close" hint. `Input CoOwnerUserId` with `Btn Set` and `Btn Clear`. `BlockList` has three `BlockRow …` rows, each with a `Btn Unblock …` button. `Input BlockUserId` with `Btn Block`. |
+| 3 | `Hotbar Screen` | `4:123` | Bar `HotbarBar` is bottom centre with 9 slots. Slots 1–6 hold tool icon placeholders, and 7–9 are empty. Slot 2 (`… (Equipped)`) has the gold highlight. Each slot has a number label. |
+| 4 | `Coin Display + Toast` | `4:150` | `HudTopRight` stacks `CoinDisplay` over `Toast Sold` ("Sold 5 Wood +5 coins"), right-aligned at the top-right. |
+
+All four frames are 1280x720 on a #12151C backdrop. They use your palette, corner radius 12 and Inter, with auto layout throughout. The green and red are my picks, since you gave no red hex: confirm and Buy buttons are #4CAF6A, and danger buttons (Clear, Block) are #E5534B. Unblock is neutral grey.
+
+**What I could not do or skipped:**
+- **Skill not loaded:** I couldn't load the `figma-use` skill because no tool for reading skill resources was available here.
+- **Fixes along the way:** The first build left the nested frames too tall, so I corrected their sizing and re-checked. Nothing overflows the panels now.
+- **No components, variables or styles:** Colours are hard-coded fills and the buttons are plain frames, not reusable components.
+- **Icons are placeholders:** Item and tool icons are grey blocks, and the coin is a gold circle.
+- **Extras I added:** An "EquippedLabel" text ("Stone Pickaxe") sits above the hotbar, and I renamed the outer hotbar frame to `Hotbar Screen` to avoid two layers called "Hotbar". The label is centred on the screen, not over slot 2.
+- **Not interactive:** There are no prototype links, hover states or toast animation.

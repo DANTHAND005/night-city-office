@@ -1,0 +1,36 @@
+Both builds are in place and every new or changed script compiles. The playtest showed no script errors, but anything that reads saved player data is still untested: the player's profile never loaded during the test.
+
+**Scripts created**
+- `ServerScriptService.Modules.Permissions`: four roles (owner, co-owner, visitor, blocked), `GetRole`, `Can(player, island, action)` and owner-only setters. Actions are Enter, Place, Break, Mine and Manage.
+- `ServerScriptService.PermissionsServer`: adds the RemoteEvent `ReplicatedStorage.Remotes.IslandPermissions`. Every argument is checked on the server, it's rate-limited with RemoteGuard, and only the island owner can make changes. Twice a second it sends any blocked player standing on an island back to `Workspace.SpawnLocation`.
+- `StarterPlayerScripts.PermissionsClient`: the panel, opened with the P key and only if you own an island. It has a UserId box and buttons for Set co-owner, Clear co-owner, Block and Unblock.
+- `ReplicatedStorage.Shared.ItemData` (new `Shared` folder): wood, stone and iron pickaxe and axe; `stone_block`; and stone, coal and iron rocks. Every number is marked PLACEHOLDER, including the 30s respawn and 12-stud reach.
+- `ServerScriptService.MiningServer`: adds the RemoteEvent `Remotes.MineStrike`. The server works out everything except the target part: the equipped tool, whether you own it (`HasItem`), permission, reach from the server's copy of the character, cooldown, tool tier and block health. Drops go through `AddMaterial`, rocks deplete and respawn, and island blocks are destroyed when mined.
+- `StarterPlayerScripts.MiningClient`: on click it sends only `mouse.Target`.
+- `Workspace.HubRocks`: 6 parts around SpawnLocation (2 stone, 2 coal, 2 iron), each tagged `HubRock`.
+
+**Scripts changed**
+- `Modules.PlayerData`:
+  - Added an `Island = { CoOwner = 0, Blocked = {} }` table to the saved data template.
+  - Added `HasItem`, `GetIslandCoOwner`, `IsIslandBlocked`, `GetIslandRoles`, `SetIslandCoOwner` and `SetIslandBlocked`. The setters write to the existing audit log.
+- `IslandServer`: PlaceBlock now uses `Permissions.Can(player, island, "Place")` instead of the owner-only check, and new blocks get `BlockId = "stone_block"`.
+
+**Backups** (in `ServerStorage.Backups`)
+- `PlayerData_backup_2026-10-17_2` and `IslandServer_backup_2026-10-17_2`. Backups with the plain `_2026-10-17` name already existed from an earlier session and hold different source, so I added `_2` rather than overwrite them.
+
+**Test results**
+- All 8 scripts compiled without errors.
+- In the playtest:
+  - Both new RemoteEvents were created.
+  - Your island showed role `owner` and `Can("Place")` returned true.
+  - All 6 rocks started at full health.
+  - The console showed only Roblox's own UIBlox warnings. I stopped the playtest and Studio is back in Edit mode.
+
+**Not verified**
+- **No saved data loaded.** The player's profile was still not loaded after about 37 seconds, possibly a lock left by an earlier session. So I haven't seen co-owner and blocking work end to end, being sent to spawn, an actual mining hit, drops, or the panel showing its current state.
+- **Live data is not safe to test on.** `Config.USE_MOCK_IN_STUDIO` is false, so playtests write real saves. I didn't give out test tools or change data for that reason.
+- **There is no BreakBlock remote.** IslandServer only has PlaceBlock, so I couldn't connect BreakBlock to Permissions. Breaking island blocks happens through mining, which checks owner or `Can(...,"Mine")`.
+- **Most tools can't be crafted yet.** `ItemData` lists all six tools, but Recipes only makes WoodPickaxe and StoneAxe. Coal and iron rocks need a pickaxe, and iron rock needs stone tier or better, so in practice nobody can mine iron yet.
+- **Placed blocks cost Wood but drop Stone**, because existing and new blocks default to `stone_block` as you specified.
+- **One co-owner per island**, following "set co-owner" (singular).
+- **I couldn't save a memory note for next session.** The file-writing tools are disabled here.

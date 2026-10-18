@@ -1,0 +1,8 @@
+I couldn't start: `list_roblox_studios` came back empty twice (`{"studios":[]}`), so no Studio instance is connected to the MCP server. Without a connection I can't read IslandServer, Setup, Permissions, MiningServer, PlayerData or Workspace.Hub, and I can't build or test anything.
+
+Nothing was changed in the place. No scripts were edited, no backups were made, and Config wasn't touched, so `USE_MOCK_IN_STUDIO` is still whatever you last left it as.
+
+To fix it:
+1. Open the "Re:islands" place in Roblox Studio.
+2. Make sure the MCP plugin is turned on and connected (check the Plugins tab, or the MCP/Assistant toggle).
+3. Tell me once it's connected. I'll pick up its id and run G1, G2 and the checks under the same rules.

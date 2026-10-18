@@ -1,0 +1,9 @@
+1. **Account:** handle "Figma Bot" (user@example.com). It is on one plan, "Figma Bot's team" (`team::REDACTED`), a starter tier where you're admin. Your seat there is **View**.
+
+2. **Finding "Re:islands":** I couldn't find it. The Figma tools here have no way to search or list files by name or recent files. Every file tool needs a file key, and I don't have one for this file.
+
+3. **Edit access:** I can't confirm it. A View seat on a starter plan normally can't edit design files, so a write would probably be rejected. I haven't tried one, because I have no file key and didn't want to guess.
+
+4. **Probe frame:** I didn't create it, since there was no file to create it in. There is no error to report because no write was attempted.
+
+To go further, send me the file's URL (`figma.com/design/<fileKey>/Re-islands...`). I'll then try creating the "Probe" frame and report the exact error if the View seat blocks it.

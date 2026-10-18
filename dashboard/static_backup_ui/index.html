@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Night City Office</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="static/style.css">
+</head>
+<body>
+<header class="top">
+  <h1>NIGHT CITY OFFICE</h1>
+  <span class="sub">local crew // 127.0.0.1:8080</span>
+  <span id="mode" class="mode down">CONNECTING</span>
+</header>
+<section class="stats" id="stats" aria-label="Crew statistics"></section>
+<main>
+  <section class="room" id="office" aria-label="The crew's room. Each bubble says what that crew member is doing; choose a local crew member to assign them a task.">
+    <canvas class="room3d" id="room3d" aria-hidden="true"></canvas>
+    <svg class="links" id="links" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"></svg>
+    <div class="layer" id="layer"></div>
+    <button type="button" class="hotspot" id="vault-btn" aria-label="Open the vault: recent notes"><span>VAULT</span></button>
+    <aside class="agent-card" id="agent-card" aria-label="Agent details" hidden></aside>
+    <div class="room-tools">
+      <span id="layout-msg" class="layout-msg" role="status" aria-live="polite"></span>
+      <button type="button" id="score-btn" class="small-btn">SCORECARD</button>
+      <button type="button" id="light-btn" class="small-btn">LIGHT: AUTO</button>
+      <button type="button" id="sound-btn" class="small-btn" aria-pressed="false">SOUND: OFF</button>
+      <button type="button" id="edit-layout" class="small-btn" aria-pressed="false">EDIT LAYOUT</button>
+    </div>
+  </section>
+
+  <div class="workbench">
+    <div class="leftcol">
+    <section class="panel lead" id="lead" aria-labelledby="lead-h">
+      <h2 id="lead-h">TALK TO THE LEAD</h2>
+      <p class="hint">Claude Code plans it, writes each agent's prompt, reviews the work and re-queues weak parts. Runs without you.</p>
+      <div class="lead-opts">
+        <div class="seg" id="model-seg" role="group" aria-label="Claude model">
+          <button type="button" data-m="auto" aria-pressed="true">AUTO</button><button type="button" data-m="sonnet" aria-pressed="false">SONNET 5.5</button><button type="button" data-m="opus" aria-pressed="false">OPUS 5.5</button>
+        </div>
+        <p class="hint" id="model-line"></p>
+        <div class="chips" id="mcp-chips" aria-label="MCP connections"></div>
+      </div>
+      <textarea id="lead-idea" rows="5" placeholder="Describe what you want built. A rough idea is fine."></textarea>
+      <label class="chk"><input type="checkbox" id="lead-research" checked> Research the web first</label>
+<div id="lead-apply"></div>
+<label class="chk" id="lead-auto-row" hidden><input type="checkbox" id="lead-auto"> Apply automatically when done (off: it asks you first)</label>
+      <div class="actions"><button type="button" id="lead-go" class="primary">START PROJECT</button><span class="hint">Ctrl+Enter</span></div>
+      <p id="lead-msg" class="msg" role="status" aria-live="polite"></p>
+      <div id="lead-run" hidden></div>
+      <div id="lead-past"></div>
+    </section>
+    <section class="panel" id="free" aria-labelledby="free-h">
+      <h2 id="free-h">FREE TIME <button type="button" id="free-toggle" class="small-btn">ON</button></h2>
+      <p class="hint" id="free-line">When no project needs them, the crew thinks up new ideas for your latest project, drafts them into C:\Vault\inbox, and proposes the good ones to the lead. Projects always come first.</p>
+      <div id="free-list"></div>
+      <div class="actions"><input id="free-idea" maxlength="2000" placeholder="Add something for the crew to draft"><button type="button" id="free-add" class="small-btn">ADD</button></div>
+      <p id="free-msg" class="msg" role="status" aria-live="polite"></p>
+    </section>
+    <section class="panel" id="research" aria-labelledby="research-h">
+      <h2 id="research-h">RESEARCH</h2>
+      <p class="hint">The lead looks for existing code and good designs before the crew builds anything. Add your own links, notes and reference images; they go into every new plan.</p>
+      <div class="actions"><input id="res-topic" maxlength="300" placeholder="Research a topic now (e.g. Roblox portal teleport, Anime Vanguards UI)"><button type="button" id="res-run" class="small-btn">RESEARCH</button></div>
+      <div class="actions"><input id="res-text" maxlength="4000" placeholder="Paste a link or note (TikTok, Reddit, YouTube, GitHub, anything)"><button type="button" id="res-add" class="small-btn">ADD</button></div>
+      <div class="actions"><label class="small-btn" for="res-file">ADD IMAGE</label><input id="res-file" type="file" accept="image/png,image/jpeg,image/gif,image/webp" hidden><span class="hint">The vision model turns it into a written design spec.</span></div>
+      <p id="res-msg" class="msg" role="status" aria-live="polite"></p>
+      <div id="res-imgs"></div>
+      <div id="res-list"></div>
+    </section>
+    <details class="panel adv">
+      <summary id="assign-h">ADVANCED: ASSIGN A TASK BY HAND</summary>
+      <form id="task-form" novalidate>
+        <label>Role
+          <select id="f-role" required></select>
+        </label>
+        <label>Title <span class="hint">optional, defaults to the first line of the input</span>
+          <input id="f-title" maxlength="200" autocomplete="off">
+        </label>
+        <label>Input
+          <textarea id="f-input" rows="8" required placeholder="What should this role do? Include any context it needs."></textarea>
+        </label>
+        <label id="f-image-wrap" hidden>Image path <span class="hint">vision only</span>
+          <input id="f-image" autocomplete="off" placeholder="C:\agents\test.png">
+        </label>
+        <label>Timeout <span class="hint">seconds, 1 to 3600</span>
+          <input id="f-timeout" type="number" min="1" max="3600" step="1" value="300">
+        </label>
+        <div class="chain">
+          <div>Then hand the result to… <span class="hint">up to 3 steps, runs only if the step before succeeds</span></div>
+          <ol id="f-steps"></ol>
+          <button type="button" id="add-step" class="ghost">+ then…</button>
+        </div>
+        <div class="actions">
+          <button type="submit" id="f-submit" class="primary">QUEUE TASK</button>
+          <span class="hint">Ctrl+Enter</span>
+        </div>
+        <p id="form-msg" class="msg" role="status" aria-live="polite"></p>
+      </form>
+    </details>
+    </div>
+
+    <section class="board" aria-label="Tasks by status">
+      <div class="col" data-status="queued"><h2>QUEUED <span class="count"></span></h2><div class="cards"></div></div>
+      <div class="col" data-status="running"><h2>RUNNING <span class="count"></span></h2><div class="cards"></div></div>
+      <div class="col" data-status="done"><h2>DONE <span class="count"></span></h2><div class="cards"></div></div>
+      <div class="col" data-status="failed"><h2>FAILED <span class="count"></span></h2><div class="cards"></div></div>
+    </section>
+  </div>
+  <footer>Results are also saved to C:\Vault\tasks\task-&lt;id&gt;.md. Treat planner and coder output as drafts.
+    Font: VT323 by Peter Hull, SIL Open Font License 1.1 (static/fonts/OFL.txt).</footer>
+</main>
+
+<dialog id="vault" aria-labelledby="v-title">
+  <div class="d-head"><h2 id="v-title">VAULT</h2><button type="button" id="v-close" class="small-btn">CLOSE</button></div>
+  <div class="vault-body"><div class="v-list" id="v-list"></div><pre class="v-text" id="v-text"></pre></div>
+</dialog>
+
+<dialog id="score" aria-labelledby="s-title">
+  <div class="d-head"><h2 id="s-title">SCORECARD</h2><button type="button" id="s-close" class="small-btn">CLOSE</button></div>
+  <div class="d-body" id="s-body"></div>
+</dialog>
+
+<dialog id="detail" aria-labelledby="d-title">
+  <div class="d-head"><h2 id="d-title"></h2><button type="button" id="d-close" class="small-btn">CLOSE</button></div>
+  <div class="d-body" id="d-body"></div>
+  <div class="d-actions" id="d-actions"></div>
+</dialog>
+
+<script type="module" src="static/room3d.js"></script>
+<script src="static/office.js"></script>
+<script src="static/board.js"></script>
+<script src="static/extras.js"></script>
+<script src="static/lead.js"></script>
+<script src="static/free.js"></script>
+<script src="static/research.js"></script>
+</body>
+</html>

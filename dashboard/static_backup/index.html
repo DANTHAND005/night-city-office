@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Night City Office</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="static/style.css">
+</head>
+<body>
+<header class="top">
+  <h1>NIGHT CITY OFFICE</h1>
+  <span class="sub">local crew // 127.0.0.1:8080</span>
+  <span id="mode" class="mode down">CONNECTING</span>
+</header>
+<main>
+  <div class="office" id="office">
+    <canvas id="scene" width="320" height="180" role="img"
+            aria-label="Pixel-art office: the crew at their desks, busy ones typing"></canvas>
+    <div class="layer" id="layer"></div>
+  </div>
+  <section class="crew" id="crew" aria-label="Crew status. Choose a local role to assign it a task."></section>
+
+  <div class="workbench">
+    <section class="panel" aria-labelledby="assign-h">
+      <h2 id="assign-h">ASSIGN A TASK</h2>
+      <form id="task-form" novalidate>
+        <label>Role
+          <select id="f-role" required></select>
+        </label>
+        <label>Title <span class="hint">optional, defaults to the first line of the input</span>
+          <input id="f-title" maxlength="200" autocomplete="off">
+        </label>
+        <label>Input
+          <textarea id="f-input" rows="8" required placeholder="What should this role do? Include any context it needs."></textarea>
+        </label>
+        <label id="f-image-wrap" hidden>Image path <span class="hint">vision only</span>
+          <input id="f-image" autocomplete="off" placeholder="C:\agents\test.png">
+        </label>
+        <label>Timeout <span class="hint">seconds, 1 to 3600</span>
+          <input id="f-timeout" type="number" min="1" max="3600" step="1" value="300">
+        </label>
+        <div class="chain">
+          <div>Then hand the result to… <span class="hint">up to 3 steps, runs only if the step before succeeds</span></div>
+          <ol id="f-steps"></ol>
+          <button type="button" id="add-step" class="ghost">+ then…</button>
+        </div>
+        <div class="actions">
+          <button type="submit" id="f-submit" class="primary">QUEUE TASK</button>
+          <span class="hint">Ctrl+Enter</span>
+        </div>
+        <p id="form-msg" class="msg" role="status" aria-live="polite"></p>
+      </form>
+    </section>
+
+    <section class="board" aria-label="Tasks by status">
+      <div class="col" data-status="queued"><h2>QUEUED <span class="count"></span></h2><div class="cards"></div></div>
+      <div class="col" data-status="running"><h2>RUNNING <span class="count"></span></h2><div class="cards"></div></div>
+      <div class="col" data-status="done"><h2>DONE <span class="count"></span></h2><div class="cards"></div></div>
+      <div class="col" data-status="failed"><h2>FAILED <span class="count"></span></h2><div class="cards"></div></div>
+    </section>
+  </div>
+  <footer>Results are also saved to C:\Vault\tasks\task-&lt;id&gt;.md. Treat planner and coder output as drafts.
+    Font: VT323 by Peter Hull, SIL Open Font License 1.1 (static/fonts/OFL.txt).</footer>
+</main>
+
+<dialog id="detail" aria-labelledby="d-title">
+  <div class="d-head"><h2 id="d-title"></h2><button type="button" id="d-close" class="small-btn">CLOSE</button></div>
+  <div class="d-body" id="d-body"></div>
+  <div class="d-actions" id="d-actions"></div>
+</dialog>
+
+<script src="static/office.js"></script>
+<script src="static/board.js"></script>
+</body>
+</html>

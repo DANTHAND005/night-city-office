@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>C · Live Tiles — Cyberpunk Arasaka Tower Office</title>
+<style>
+@font-face { font-family: "VT323"; src: url("../../../dashboard/static/fonts/VT323-Regular.ttf"); }
+:root { --bg:#000; --tile:#1f1f1f; --ink:#fff; --mut:#a6a6a6; --live:#a4d233; --pc:#1b8fd6; --lap:#d4317f; --fail:#ff4b3a; --boss:#f0a30a;
+  --sans:"Segoe UI",system-ui,sans-serif; }
+* { box-sizing:border-box; } html,body { margin:0; width:1440px; height:900px; overflow:hidden; }
+body { background:var(--bg); color:var(--ink); font:14px/1.35 var(--sans); }
+.vt { font-family:"VT323",monospace; }
+/* giant lowercase title cropped by the right edge */
+header { position:relative; height:84px; padding:0 0 0 28px; white-space:nowrap; overflow:hidden; }
+h1 { margin:0; font:200 76px/84px var(--sans); letter-spacing:-.02em; }
+h1 span { color:var(--mut); }
+.live { position:absolute; right:0; top:22px; background:var(--live); color:#000; font:22px/1 "VT323"; padding:6px 14px 4px; }
+.sub { position:absolute; right:96px; top:28px; color:var(--mut); font:20px "VT323"; }
+/* signature: role tiles; a working role's tile floods with the live colour and flips to its task */
+.panes { display:flex; gap:40px; padding:14px 0 0 28px; overflow:hidden; }
+.pane h2 { margin:0 0 8px; font:300 30px var(--sans); }
+.pane h2 small { font:16px "VT323"; color:var(--mut); margin-left:10px; vertical-align:middle; }
+.tiles { display:grid; grid-auto-flow:column; grid-template-rows:118px 118px; gap:8px; }
+.tile { width:118px; height:118px; background:var(--tile); padding:8px 10px; display:flex; flex-direction:column; justify-content:space-between; position:relative; }
+.tile .nm { font:600 15px var(--sans); } .tile .rl { color:var(--mut); font-size:12px; }
+.tile .stt { font:18px/1 "VT323"; color:var(--mut); }
+.tile.wide { width:244px; }
+.tile.on { background:var(--live); color:#000; } .tile.on .rl, .tile.on .stt { color:#000; }
+.tile.on .task { font:600 16px/1.2 var(--sans); }
+.tile .edge { position:absolute; left:0; top:0; bottom:0; width:6px; background:var(--lane); }
+.tile.on .edge { display:none; }
+.tile.flag { box-shadow:inset 0 -6px 0 var(--fail); }
+.tile.off { background:#111; color:#8c8c8c; } .tile.off .rl { color:#8c8c8c; }
+.tile.boss { background:var(--boss); color:#000; } .tile.boss .rl, .tile.boss .stt { color:#000; }
+.peek { align-self:flex-start; margin:-6px -70px 0 auto; font:200 76px/1 var(--sans); color:#666; white-space:nowrap; }
+/* work area */
+.work { display:grid; grid-template-columns:360px 1fr; gap:28px; padding:20px 28px; }
+h3 { margin:0 0 10px; font:300 24px var(--sans); }
+label { display:block; margin-bottom:8px; color:var(--mut); font-size:12px; }
+.in { display:block; width:100%; margin-top:3px; padding:6px 8px; background:#fff; color:#000; font:13px var(--sans); }
+.ta { height:78px; font:12px Consolas,monospace; }
+.row { display:flex; gap:8px; } .row label { flex:1; }
+.btn { background:var(--live); color:#000; padding:8px 18px; font:600 14px var(--sans); }
+.ghost { color:var(--ink); border:1px solid #555; padding:3px 9px; font-size:12px; }
+.board { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; }
+.col h3 { display:flex; justify-content:space-between; align-items:baseline; }
+.col h3 .vt { font-size:26px; color:var(--c); }
+.t { background:var(--tile); padding:7px 10px; margin-bottom:6px; border-left:6px solid var(--lane); }
+.t .m { display:flex; gap:8px; color:var(--mut); font:17px "VT323"; } .t .m .r { margin-left:auto; }
+.t .ti { font-size:13px; } .t .ch { color:var(--live); font-size:12px; }
+.t.fail { background:var(--fail); color:#000; border-left-color:var(--fail); } .t.fail .m { color:#000; }
+.t .e { font:12px Consolas,monospace; margin-top:2px; }
+.note { position:absolute; right:28px; bottom:6px; color:var(--mut); font-size:12px; }
+</style></head><body>
+<header><h1>cyberpunk arasaka <span>tower office</span></h1><span class="live">LIVE</span><span class="sub">local crew // 127.0.0.1:8080</span></header>
+<section class="panes">
+  <div class="pane"><h2>pc floor <small>GPU · 1 AT A TIME · QUEUE 1</small></h2>
+    <div class="tiles">
+      <div class="tile wide on"><div><div class="nm">Maine</div><div class="rl">planner · qwen3:8b</div></div><div class="task">#14 Plan a sword shop</div><div class="stt">WORKING 00:41</div></div>
+      <div class="tile wide flag" style="--lane:var(--pc)"><span class="edge"></span><div><div class="nm">Lucy</div><div class="rl">coder · qwen2.5-coder:7b</div></div><div class="stt">IDLE · LAST #12 FAILED</div></div>
+    </div></div>
+  <div class="pane"><h2>laptop floor <small>192.168.x.x · 1 AT A TIME · QUEUE 0</small></h2>
+    <div class="tiles">
+      <div class="tile wide on"><div><div class="nm">Rebecca</div><div class="rl">vision · qwen3-vl:4b</div></div><div class="task">#13 Read the screenshot</div><div class="stt">WORKING 00:18</div></div>
+      <div class="tile" style="--lane:var(--lap)"><span class="edge"></span><div><div class="nm">Kiwi</div><div class="rl">memory</div></div><div class="stt">IDLE 14.8s</div></div>
+      <div class="tile" style="--lane:var(--lap)"><span class="edge"></span><div><div class="nm">Falco</div><div class="rl">trimmer</div></div><div class="stt">IDLE 12.3s</div></div>
+      <div class="tile boss"><div><div class="nm">David</div><div class="rl">claude-code</div></div><div class="stt">CLOUD · ON CALL</div></div>
+      <div class="tile off"><div><div class="nm">Hermes</div><div class="rl">server rack</div></div><div class="stt">OFFLINE</div></div>
+    </div></div>
+  <div class="peek">tasks</div>
+</section>
+<section class="work">
+  <div><h3>assign a task</h3>
+    <div class="row"><label>Role<span class="in">Lucy — coder</span></label><label style="flex:.6">Timeout<span class="in">300 s</span></label></div>
+    <label>Title (optional)<span class="in">Fix the shop's price rounding</span></label>
+    <label>Input<span class="in ta">prices show 9.999 in the sword shop UI; round to 2 places when displaying and add a test</span></label>
+    <label>Then hand the result to…<span class="in">1 · Falco — trimmer: summarize the change</span></label>
+    <div class="row" style="align-items:center"><span class="ghost">+ then…</span><span style="margin-left:auto;color:var(--mut);font-size:12px">Ctrl+Enter</span><span class="btn">queue task</span></div>
+  </div>
+  <div class="board">
+    <div class="col" style="--c:var(--mut)"><h3>queued <span class="vt">1</span></h3>
+      <div class="t" style="--lane:var(--pc)"><div class="m"><span>#15</span><span>planner</span><span class="r">waits for PC</span></div><div class="ti">Shop bug: trim → plan → code</div><div class="ch">step 2 of 3 · laptop → pc</div></div></div>
+    <div class="col" style="--c:var(--live)"><h3>running <span class="vt">2</span></h3>
+      <div class="t" style="--lane:var(--pc)"><div class="m"><span>#14</span><span>planner</span><span class="r">00:41</span></div><div class="ti">Plan a sword shop</div></div>
+      <div class="t" style="--lane:var(--lap)"><div class="m"><span>#13</span><span>vision</span><span class="r">00:18</span></div><div class="ti">Read the screenshot</div></div></div>
+    <div class="col" style="--c:var(--ink)"><h3>done <span class="vt">9</span></h3>
+      <div class="t" style="--lane:var(--pc)"><div class="m"><span>#11</span><span>coder</span><span class="r">2.4s</span></div><div class="ti">Plan a sword shop → coder</div></div>
+      <div class="t" style="--lane:var(--pc)"><div class="m"><span>#9</span><span>planner</span><span class="r">33.3s</span></div><div class="ti">Shop bug: trim → plan → code → planner</div></div>
+      <div class="t" style="--lane:var(--lap)"><div class="m"><span>#6</span><span>trimmer</span><span class="r">12.3s</span></div><div class="ti">Shop bug: trim → plan → code</div></div>
+      <div class="t" style="--lane:var(--lap)"><div class="m"><span>#4</span><span>memory</span><span class="r">14.8s</span></div><div class="ti">Summarize setup session</div></div></div>
+    <div class="col" style="--c:var(--fail)"><h3>failed <span class="vt">3</span></h3>
+      <div class="t fail"><div class="m"><span>#12</span><span>coder</span><span class="r">1.3s</span></div><div class="ti">Timeout test (1 s)</div><div class="e">timed out after 1 s waiting for the coder model</div></div>
+      <div class="t" style="--lane:var(--pc)"><div class="m"><span>#8</span><span>coder</span><span class="r">—</span></div><div class="ti">Cancel me</div></div></div>
+  </div>
+</section>
+<div class="note">MOCKUP · sample data · VT323 by Peter Hull, SIL OFL 1.1</div>
+</body></html>

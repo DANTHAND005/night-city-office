@@ -1,0 +1,6 @@
+﻿Continue building directly in Roblox Studio, place "Re:islands" only (list_roblox_studios, pass its id on every call). Same rules as before: never delete, back up any script you change as a StringValue under ServerStorage.Backups (new unique name), no third-party assets, server authority, write files in full.
+
+TASK 1, why the profile never loaded in the last playtest: read PlayerData and Config, find the cause (Studio API access to DataStores off, ProfileStore session lock, a bug in our code). Do not change Studio settings. If it is our code, fix it. If it is the setting, say exactly which one the owner must enable.
+TASK 2, test with the built-in mock: temporarily set Config.USE_MOCK_IN_STUDIO = true (back up Config first), playtest, and verify end to end with execute_luau or the client: owner mines a block and a HubRock with a pickaxe granted via the mock profile only, drops land in Materials, a blocked UserId is rejected by Permissions.Can, co-owner can Place. Then set USE_MOCK_IN_STUDIO back to false and confirm it is false, stop the playtest, return to Edit mode.
+TASK 3: add the missing recipes so all six tools in ItemData can be crafted (read Recipes and CraftingServer first, reuse their pattern, placeholder costs).
+FINAL ANSWER: what you found and fixed, test results with actual numbers, what is still unverified. Be brief.

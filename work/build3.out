@@ -1,0 +1,43 @@
+The shop is built and every playtest check passed. Studio is back in Edit mode, and `Config.USE_MOCK_IN_STUDIO` is `false` again (I restored it from the backup and checked it).
+
+**Created**
+- `ReplicatedStorage.Shared.ShopData`: sell prices (Wood 1, Stone 1, Coal 3, IronOre 6), tool prices (Wood tools 20, Stone tools 60, Iron tools 200), and a 20-stud shop range. Every number is marked PLACEHOLDER.
+- `ServerScriptService.ShopServer`: handles "Sell" and "Buy". It checks:
+  - the rate limit (RemoteGuard) and the argument types
+  - that the player is within 20 studs of the stall
+  - that the item name is in ShopData (tools must also be in ItemData)
+  - that the amount is a whole number from 1 to 9999
+  - that the player doesn't already own the tool
+
+  It sends an ok/message reply back to the client on the same remote.
+- `Workspace.ShopStall`: a Part with an "Open Shop" ProximityPrompt, near the spawn.
+- `StarterPlayerScripts.ShopClient`: the panel shows coins, a "Sell all" button per material and a Buy/Owned button per tool. It only sends the action, name and amount.
+
+**Changed**
+- `Modules.PlayerData`: added `SpendCoins`, plus `SellMaterial` and `BuyItem`. Each sale or purchase is a single change with an audit entry, and none of them can push coins or materials below zero. `RemoveMaterial` already existed.
+- `Setup`: added `ShopRequest` to its list of remotes. Like the other remotes, it is created when the game runs.
+- Starting content: the template already gives 100 coins, 20 Wood and 10 Stone but no WoodPickaxe, so I left the template unchanged.
+
+**Backups** (in `ServerStorage.Backups`): `PlayerData_backup_2026-10-17_buildC`, `Setup_backup_2026-10-17_buildC`, `Config_backup_2026-10-17_buildC`.
+
+**Tests**: all 22 scripts compile with no errors. Playtest results:
+
+| Step | Result |
+|---|---|
+| Start | 100 coins, 20 Wood |
+| Sell 5 Wood | 105 coins, 15 Wood |
+| Buy StonePickaxe | 45 coins, StonePickaxe in Backpack |
+
+These were all rejected, and coins, Wood and tools stayed at 45 / 15 / StonePickaxe each time:
+- amounts of -5, 1.5 and 10000
+- selling 999 Wood (more than owned)
+- an unknown item ("Diamond") and an unknown tool ("GoldSword")
+- buying IronPickaxe with too few coins (200 needed)
+- buying StonePickaxe a second time
+- an unknown action
+
+**Not verified**
+- **Audit log:** I couldn't read the saved data during the playtest, so I checked state through the player's attributes and Backpack. The audit entries are in the code but I never saw them.
+- **Mock data:** the startup log still says "data will be saved", so I can't confirm the test used the mock rather than real data. The fresh starting values suggest it did.
+- **UI:** I didn't click through the shop panel or the prompt by hand, and nothing tests it automatically.
+- **Range check:** the 20-stud range check only ran in its passing case (the character was moved 6 studs from the stall). The "too far" rejection never ran.

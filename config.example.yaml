@@ -1,0 +1,32 @@
+model_list:
+  - model_name: coder
+    litellm_params:
+      model: ollama_chat/qwen3:8b
+      api_base: http://localhost:11434
+
+  - model_name: planner
+    litellm_params:
+      model: ollama_chat/qwen3:8b
+      api_base: http://localhost:11434
+
+  - model_name: vision
+    litellm_params:
+      model: ollama_chat/qwen3-vl:4b
+      api_base: http://192.168.x.x:11434
+
+  - model_name: memory
+    litellm_params:
+      model: ollama_chat/memory-cpu
+      api_base: http://192.168.x.x:11434
+
+  - model_name: trimmer
+    litellm_params:
+      model: ollama_chat/trimmer-cpu
+      api_base: http://192.168.x.x:11434
+
+general_settings:
+  master_key: os.environ/LITELLM_MASTER_KEY
+
+litellm_settings:
+  drop_params: true
+  request_timeout: 300

@@ -1,0 +1,55 @@
+F1 (three shop sellers) and F2 (fishing) are built in Re:islands, and every scripted test passed with mock data. Studio is back in Edit mode with `Config.USE_MOCK_IN_STUDIO = false`, and Config is byte-identical to its backup.
+
+**What changed**
+- **ShopData:** new `Stalls` table:
+  - `OreBuyer` buys Wood, Stone, Coal and IronOre.
+  - `ToolSmith` buys and sells the 6 tools plus the 3 rods.
+  - `Fisher` buys fish.
+  - I added sell-back prices for tools and rods; fish prices come from FishData. All marked PLACEHOLDER.
+  - I lowered `SHOP_REACH` from 20 to 10. The stalls are only 14 studs apart, so at 20 you could trade with a neighbouring stall. 10 matches the prompt distance.
+- **ShopServer:** the remote now takes `(stallId, action, name, amount)`. The server finds the stall part itself (by tag and `StallId`), checks you're near that stall, and checks the item belongs to it. All the old rejections still work. Selling a tool or rod goes through a new `PlayerData.SellItem` mutator, then your Tools are re-synced.
+- **PlayerData:** two new mutators, both with audit reasons:
+  - `SellItem` removes the item and adds the coins in one step.
+  - `AddFish` checks the name against FishData and stores the fish as a Materials entry.
+- **ItemData / Recipes:** WoodRod, StoneRod and IronRod are added with placeholder recipe costs. Rods live in a separate `ItemData.Rods` table, so the mining code never treats a rod as a mining tool.
+- **FishData (new):** 4 fish with weights and sell prices, plus the timing values (bite delay 3–7s, shorter at higher rod tiers; 1.5s reaction window; 10-stud reach). All PLACEHOLDER.
+- **FishingServer (new):** creates the `FishCast` and `FishReel` remotes. The server:
+  - picks the bite delay, keeps one cast per player and times the reaction window on its own clock;
+  - requires an equipped rod you own (`HasItem`) and being within reach of a `FishingSpot`;
+  - rejects any extra arguments, applies the RemoteGuard rate limit, and chooses the catch from the weighted table.
+  - Status messages go back to the client on `FishCast`.
+- **ShopClient:** rewritten so each stall's prompt opens that stall's own panel (scrolling list). It also adds the optional NPC idle sway.
+- **FishingClient (new):** hint text ("Cast (click)", "Waiting for a bite...", "Bite! Reel!"), click to cast or reel, and a red bobber. The hint hides while a shop panel is open.
+- **World:**
+  - New ToolSmithStall and FisherStall counters on StallSpot_1 and _2. All three stalls are tagged `Stall` and have a prompt.
+  - Three NPCs built from Parts, each with a Humanoid and a floating name tag.
+  - A terrain water pond at (8, 0, 46) north of the plaza, with 3 wooden docks tagged `FishingSpot`.
+
+**Backups** are in `ServerStorage.Backups`, named `*_backup_2026-10-17_buildF`, for: ShopServer, ShopData, ItemData, Recipes, PlayerData, ShopClient and Config.
+
+**Test results**
+- **Shop: 29/29 passed.**
+  - Each stall bought and sold correctly.
+  - Wrong-stall items were rejected: tool at the Ore Buyer, fish at the Ore Buyer, Wood at the Tool Smith, Stone or a rod at the Fisher.
+  - Standing at one stall while asking another, or standing away from all stalls, was rejected as too far.
+  - Bad input was rejected: unknown stall, the old 3-argument call, unknown item, bad amounts (0, 1.5, NaN, a string), wrong argument types, a name that's too long, an unknown action, not enough materials, already owned, and selling a tool you don't own.
+  - The server's coin total was 1110 as expected, and 1125 after selling the catch.
+- **Fishing: 20/20 passed.**
+  - Rejected: no rod, out of range, extra arguments, reeling without a cast, a second cast, reeling early, and reeling after the window (bite came at about 5.8s, reeled 1.9s later).
+  - Two valid reels caught a Trout and a Salmon; both appeared in Materials and sold at the Fisher.
+  - An unreeled fish sent "Escaped".
+  - Spamming 25 reels got only 10 replies, so the rate limit is working.
+- **Errors:** none from game scripts, and every script compiles. The console only shows Roblox's own UIBlox warnings.
+
+The first test run found a double-freeze crash in ShopData, which I fixed. To drive the data during tests I used a temporary hook script; it only existed while the playtest ran and is gone now.
+
+**Screenshots I looked at**
+- The three stalls with their NPCs and name tags, with the Fisher panel open.
+- The pond with its three docks. My first water fill didn't take, so I widened it and re-checked until the docks sat over water.
+- The red "Bite! Reel!" prompt while fishing.
+
+**Not verified**
+- Real mouse clicks and holding the prompt by hand. The tests fired the remotes and triggered prompts directly.
+- The NPC sway, which I didn't watch in motion.
+- The bobber in a screenshot: it was behind the avatar. I confirmed it existed at the right spot in the water by checking its position instead.
+- Behaviour with real saves (mock off) and with more than one player.

@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Room — Cyberpunk Arasaka Tower Office</title>
+<style>
+@font-face { font-family: "VT323"; src: url("../../../dashboard/static/fonts/VT323-Regular.ttf"); }
+:root { --bg:#0b0e24; --panel:#141a3c; --deep:#0f1330; --line:#29326a; --ink:#e8e9f5; --mut:#a3a9d1;
+  --cyan:#05d9e8; --pink:#ff4fd8; --yellow:#f5d300; --green:#7ee08a; --red:#ff5a5f; --sans:"Segoe UI",system-ui,sans-serif; }
+* { box-sizing:border-box; } body { margin:0; width:1440px; background:var(--bg); color:var(--ink); font:14px/1.35 var(--sans); }
+.vt { font-family:"VT323",monospace; }
+header { display:flex; align-items:center; gap:18px; height:48px; padding:0 24px; border-bottom:1px solid var(--line); }
+h1 { margin:0; font:600 16px var(--sans); letter-spacing:.12em; text-transform:uppercase; }
+.sub { color:var(--mut); font-size:20px; } .live { margin-left:auto; color:var(--green); border:1px solid var(--green); padding:0 8px; font-size:20px; }
+/* the room: 288 x 120 pixel scene drawn at 5x */
+.room { position:relative; width:1440px; height:600px; overflow:hidden; }
+.room canvas { position:absolute; inset:0; width:100%; height:100%; image-rendering:pixelated; }
+.room svg { position:absolute; inset:0; width:100%; height:100%; }
+/* live bubbles, placed by the script above each character's head */
+.bub { position:absolute; --ax:50%; transform:translate(calc(-1 * var(--ax)),-100%); padding:6px 10px 7px; font-size:13px; line-height:1.25; white-space:nowrap; }
+.bub.l { --ax:85%; } .bub.r { --ax:15%; }
+.bub b { font-weight:600; } .bub .n { font:17px/1 "VT323"; margin-left:6px; }
+.bub .who { display:block; font:16px/1 "VT323"; letter-spacing:.04em; margin-bottom:2px; }
+.bub::after { content:""; position:absolute; left:var(--ax); bottom:-8px; transform:translateX(-50%); border:8px solid transparent; border-bottom:0; }
+.bub.busy { background:#f4f1ff; color:#14112c; } .bub.busy .who { color:#4a3a9a; } .bub.busy::after { border-top-color:#f4f1ff; }
+.bub.idle { background:#151a3c; color:var(--ink); border:1px solid var(--line); } .bub.idle .who { color:var(--mut); } .bub.idle::after { border-top-color:#29326a; }
+.bub .fail { color:var(--red); } .bub.off { border-style:dashed; color:var(--mut); }
+.holo { position:absolute; left:calc(157/288*100%); top:calc(4/120*100%); width:calc(64/288*100%); color:#d6f9ff; font:18px/1.1 "VT323"; padding:8px 12px; }
+.holo .row { display:flex; justify-content:space-between; } .holo .hd { color:#fff; margin-bottom:4px; } .holo .tot { color:#fff; border-top:1px solid #05d9e8; margin-top:4px; padding-top:3px; }
+.packet { position:absolute; transform:translate(-50%,-50%); background:var(--yellow); color:#1a1400; font:18px/1 "VT323"; padding:3px 8px; }
+.asset { position:absolute; right:12px; bottom:8px; color:var(--mut); font:17px "VT323"; background:#0b0e24; padding:2px 6px; }
+/* work area: the same controls as today, restyled */
+.work { display:grid; grid-template-columns:360px 1fr; gap:18px; padding:16px 24px 24px; }
+.panel { background:var(--panel); border:1px solid var(--line); padding:14px; }
+h2 { margin:0 0 10px; font:600 12px var(--sans); letter-spacing:.14em; color:var(--mut); }
+label { display:block; margin-bottom:9px; color:var(--mut); font-size:12px; }
+.in { display:block; width:100%; margin-top:3px; padding:6px 8px; background:var(--deep); border:1px solid var(--line); color:var(--ink); font:13px var(--sans); }
+.ta { height:80px; font:12px Consolas,monospace; } .row2 { display:flex; gap:8px; } .row2 label { flex:1; }
+.btn { background:var(--pink); color:#1a0418; padding:8px 16px; font:700 12px var(--sans); letter-spacing:.14em; }
+.ghost { color:var(--mut); border:1px dashed var(--line); padding:3px 9px; font-size:12px; }
+.board { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; }
+.col { background:var(--panel); border:1px solid var(--line); padding:10px; }
+.col h2 { display:flex; justify-content:space-between; color:var(--c); border-bottom:2px solid var(--c); padding-bottom:6px; }
+.col h2 .vt { font-size:20px; letter-spacing:0; }
+.t { background:var(--deep); border:1px solid var(--line); padding:7px 9px; margin-bottom:7px; }
+.t .m { display:flex; gap:8px; color:var(--mut); font:17px "VT323"; } .t .m .r { margin-left:auto; }
+.t .ti { font-size:13px; } .t .ch { color:var(--yellow); font-size:12px; }
+.t .ft { display:flex; justify-content:space-between; color:var(--mut); font:16px "VT323"; margin-top:2px; } .t .ft a { color:#b9a6ff; text-decoration:none; }
+.t.fail { border-color:var(--red); } .t .e { color:#ffb0a8; font:12px Consolas,monospace; }
+.note { color:var(--mut); font-size:12px; padding:0 24px 16px; }
+</style></head><body>
+<header><h1>Cyberpunk Arasaka Tower Office</h1><span class="vt sub">local crew // 127.0.0.1:8080</span><span class="vt live">LIVE</span></header>
+<section class="room" id="room" aria-label="The crew's room. Bubbles show what each one is doing.">
+  <canvas id="scene" width="288" height="120"></canvas>
+  <svg viewBox="0 0 288 120" preserveAspectRatio="none" aria-hidden="true">
+    <path d="M262 66 Q237 36 212 66" fill="none" stroke="#f5d300" stroke-width=".5" stroke-dasharray="1.6 1.2"/>
+  </svg>
+  <div class="holo"><div class="hd">TODAY · TOKENS</div>
+    <div class="row"><span>Maine</span><span>5.8k</span></div><div class="row"><span>Falco</span><span>3.0k</span></div>
+    <div class="row"><span>Lucy</span><span>2.4k</span></div><div class="row"><span>Kiwi</span><span>1.9k</span></div>
+    <div class="row"><span>Rebecca</span><span>1.6k</span></div><div class="row tot"><span>LOCAL</span><span>14.7k</span></div></div>
+  <div class="packet" style="left:calc(237/288*100%);top:calc(51/120*100%)">#15 → planner</div>
+  <div class="bub idle r" data-who="lucy"><span class="who">LUCY · CODER · JACKED IN</span>idle · <span class="fail">last #12 failed</span><span class="n">2.4k tok</span></div>
+  <div class="bub busy r" data-who="rebecca"><span class="who">REBECCA · VISION</span><b>#13 Read the screenshot</b><span class="n">00:18 · 640 tok</span></div>
+  <div class="bub idle" data-who="david"><span class="who">DAVID · CLAUDE CODE</span>2 sub-agents<br>usage est. 41%</div>
+  <div class="bub idle l" data-who="kiwi"><span class="who">KIWI · MEMORY · JACKED IN</span>idle<span class="n">1.9k tok</span></div>
+  <div class="bub busy" data-who="maine"><span class="who">MAINE · PLANNER</span><b>#14 Plan a sword shop</b><span class="n">00:41 · 1.1k</span></div>
+  <div class="bub idle l" data-who="falco"><span class="who">FALCO · TRIMMER</span>passed #15<span class="n">3.0k</span></div>
+  <div class="bub idle off l" data-who="hermes"><span class="who">HERMES</span>offline · no runner</div>
+  <div class="asset">art: C:\Vault\assets\office</div>
+</section>
+<section class="work">
+  <div class="panel"><h2>ASSIGN A TASK</h2>
+    <div class="row2"><label>Role<span class="in">Lucy — coder</span></label><label style="flex:.6">Timeout<span class="in">300 s</span></label></div>
+    <label>Title (optional)<span class="in">Fix the shop's price rounding</span></label>
+    <label>Input<span class="in ta">prices show 9.999 in the sword shop UI; round to 2 places when displaying and add a test</span></label>
+    <label>Then hand the result to…<span class="in">1 · Falco — trimmer: summarize the change</span></label>
+    <div class="row2" style="align-items:center"><span class="ghost">+ then…</span><span style="margin-left:auto;color:var(--mut);font-size:12px">Ctrl+Enter</span><span class="btn">QUEUE TASK</span></div>
+  </div>
+  <div class="board">
+    <div class="col" style="--c:var(--mut)"><h2>QUEUED <span class="vt">1</span></h2>
+      <div class="t"><div class="m"><span>#15</span><span>planner</span><span class="r">waits for Maine</span></div><div class="ti">Shop bug: trim → plan → code</div><div class="ch">step 2 of 3 · from Falco (laptop → PC)</div></div></div>
+    <div class="col" style="--c:var(--cyan)"><h2>RUNNING <span class="vt">2</span></h2>
+      <div class="t"><div class="m"><span>#14</span><span>planner</span><span class="r">00:41</span></div><div class="ti">Plan a sword shop</div><div class="ft"><span>1.1k tok so far</span></div></div>
+      <div class="t"><div class="m"><span>#13</span><span>vision</span><span class="r">00:18</span></div><div class="ti">Read the screenshot</div><div class="ft"><span>640 tok so far</span></div></div></div>
+    <div class="col" style="--c:var(--green)"><h2>DONE <span class="vt">9</span></h2>
+      <div class="t"><div class="m"><span>#11</span><span>coder</span><span class="r">2.4s</span></div><div class="ti">Plan a sword shop → coder</div><div class="ft"><span>210 in · 488 out</span><a href="#">Obsidian ↗</a></div></div>
+      <div class="t"><div class="m"><span>#9</span><span>planner</span><span class="r">33.3s</span></div><div class="ti">Shop bug: trim → plan → code → planner</div><div class="ft"><span>1.2k in · 1.9k out</span><a href="#">Obsidian ↗</a></div></div>
+      <div class="t"><div class="m"><span>#6</span><span>trimmer</span><span class="r">12.3s</span></div><div class="ti">Shop bug: trim → plan → code</div><div class="ft"><span>640 in · 312 out</span><a href="#">Obsidian ↗</a></div></div></div>
+    <div class="col" style="--c:var(--red)"><h2>FAILED <span class="vt">3</span></h2>
+      <div class="t fail"><div class="m"><span>#12</span><span>coder</span><span class="r">1.3s</span></div><div class="ti">Timeout test (1 s)</div><div class="e">timed out after 1 s waiting for the coder model</div></div>
+      <div class="t"><div class="m"><span>#8</span><span>coder</span><span class="r">—</span></div><div class="ti">Cancel me</div></div></div>
+  </div>
+</section>
+<p class="note">MOCKUP · sample data, token numbers and the Claude Code usage figure are illustrative · VT323 by Peter Hull, SIL OFL 1.1</p>
+<script src="sprites.js"></script>
+<script>
+const ctx = document.getElementById('scene').getContext('2d');
+const R = (c, x, y, w, h, a = 1) => { ctx.globalAlpha = a; ctx.fillStyle = c; ctx.fillRect(x, y, w, h); ctx.globalAlpha = 1; };
+const heads = {};
+const put = (id, x, feet, opts) => { const i = drawSprite(ctx, id, x, feet, opts); heads[id] = { x, top: i.top }; return i; };
+// shell: ceiling, wall, floor
+R('#0c0f26', 0, 0, 288, 11); R('#161c42', 0, 11, 288, 59); R('#10142f', 0, 70, 288, 50);
+for (let y = 78; y < 120; y += 9) R('#171d46', 0, y, 288, 1);
+for (let x = 0; x < 288; x += 20) R('#171d46', x, 70, 1, 50);
+for (let a = 0; a < 36; a++) { const t = a / 36 * Math.PI * 2; R('#d8e83a', Math.round(62 + Math.cos(t) * 11), Math.round(6 + Math.sin(t) * 2), 1, 1); }
+// window with the city at night
+R('#2a3266', 3, 16, 86, 47); R('#0a1030', 5, 18, 82, 43);
+[[7,40,8],[16,30,10],[27,42,7],[35,25,11],[48,36,8],[57,22,10],[69,33,8],[78,28,8]].forEach(([x, y, w], i) => {
+  R(i % 2 ? '#141c4c' : '#1b2560', x, y, w, 61 - y);
+  for (let wy = y + 3; wy < 59; wy += 4) for (let wx = x + 2; wx < x + w - 1; wx += 3)
+    if ((wx * 7 + wy * 3 + i) % 5 === 0) R(['#05d9e8', '#f5d300', '#ff4fd8'][(wx + wy) % 3], wx, wy, 1, 1);
+});
+// magenta alcove
+R('#4a1656', 104, 20, 46, 50); R('#7a2486', 107, 23, 40, 47); R('#ff4fd8', 117, 25, 14, 1); R('#c04ab0', 109, 60, 36, 9);
+// ceiling holo panel (the token totals sit on top as text)
+R('#3a4280', 189, 0, 1, 4); R('#0aa8e8', 157, 4, 64, 37, .22); R('#05d9e8', 157, 4, 64, 1, .8); R('#05d9e8', 157, 40, 64, 1, .8);
+// door and Hermes' rack, dark because Hermes is offline
+R('#2fa8ff', 232, 23, 18, 1); R('#1a2250', 232, 27, 18, 43); R('#0f1438', 240, 42, 2, 5);
+R('#12152e', 257, 33, 22, 37); for (let y = 36; y < 68; y += 5) { R('#1e2244', 259, y, 18, 3); R('#3a3f5a', 275, y + 1, 1, 1); }
+heads.hermes = { x: 268, top: 33 };
+// couch: back, then Lucy jacked in and Rebecca on the arm, then the seat in front of them
+R('#2b3a8a', 8, 72, 74, 14); R('#24327a', 82, 76, 8, 24); R('#2b3a8a', 4, 76, 6, 24);
+const lucy = put('lucy', 30, 94, { cut: 4 });
+put('rebecca', 87, 94, { cut: 3 }); drawLaptop(ctx, 87, 91, '#9cff4a');
+R('#33449c', 10, 86, 72, 6); R('#22306f', 10, 92, 72, 8); R('#ff4fd8', 4, 101, 86, 1);
+R('#2a3266', 40, 104, 30, 2); R('#1a2048', 42, 106, 2, 7); R('#1a2048', 66, 106, 2, 7); R('#3a4280', 60, 101, 6, 3);
+drawJackIn(ctx, lucy, { x: 62, y: 101 }, '#05d9e8');
+// David with two Claude Code sub-agents as holograms
+put('david', 122, 112); drawLaptop(ctx, 122, 104);
+drawHolo(ctx, 106, 112, '#05d9e8'); drawHolo(ctx, 138, 112, '#05d9e8');
+// Kiwi in the egg chair, jacked in
+R('#8a90b8', 158, 77, 24, 2); R('#2a2f5a', 159, 79, 22, 18);
+const kiwi = put('kiwi', 170, 101, { cut: 6 });
+R('#2a2f5a', 158, 93, 24, 7); R('#8a90b8', 158, 100, 24, 1); R('#1a1d38', 161, 101, 2, 7); R('#1a1d38', 177, 101, 2, 7);
+R('#3a4280', 186, 106, 6, 3); drawJackIn(ctx, kiwi, { x: 188, y: 106 }, '#ff3a5c');
+// Maine at the holo table
+put('maine', 212, 96, { cut: 3 });
+R('#05d9e8', 198, 86, 30, 4, .3); R('#2a3266', 194, 90, 38, 3); R('#1a2048', 196, 93, 34, 9);
+// Falco at the workbench
+put('falco', 262, 96, { cut: 3 });
+R('#4a3a30', 240, 90, 46, 3); R('#2a2228', 242, 93, 42, 11); drawLaptop(ctx, 262, 90);
+// bubbles: 2 px above each head
+document.querySelectorAll('.bub[data-who]').forEach(b => {
+  const h = heads[b.dataset.who];
+  b.style.left = `${h.x / 288 * 100}%`; b.style.top = `${(h.top - 2) / 120 * 100}%`;
+});
+</script>
+</body></html>

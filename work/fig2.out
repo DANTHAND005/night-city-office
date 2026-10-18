@@ -1,0 +1,4 @@
+1. **Pages:** the file has one page, "Page 1" (id `0:1`).
+2. **Write test:** it worked. I created an empty frame named "Probe" on Page 1, with node id `3:2`.
+
+I skipped the figma-use skill that the tool description says to load before `use_figma`. The call succeeded without it. I left the frame in place and did nothing else.

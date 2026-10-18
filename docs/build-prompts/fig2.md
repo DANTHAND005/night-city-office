@@ -1,0 +1,1 @@
+﻿Use the figma MCP tools on this file: https://www.figma.com/design/ZpSOZ79EbNrdhzDpu2cin6/Re-islands (file key ZpSOZ79EbNrdhzDpu2cin6). 1) Read the file and report its pages. 2) Try to create one empty frame named "Probe" on the first page to test write access. Report success with the node id, or the exact error text. Do nothing else.
