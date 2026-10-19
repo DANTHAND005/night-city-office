@@ -4,6 +4,10 @@ A local dashboard where a Claude "lead" plans and reviews work for a crew of loc
 
 ![Night City Office dashboard: live 3D office with the agent crew, task board and success stats](docs/screenshots/dashboard.png)
 
+| Scorecard | Changes log | Research |
+|---|---|---|
+| ![Per-agent scorecard](docs/screenshots/scorecard.png) | ![Changes log written by the lead](docs/screenshots/changes.png) | ![Research panel](docs/screenshots/research.png) |
+
 Everything runs on one Windows PC (plus a laptop for two models). Nothing is hosted.
 
 ## What is in this repo
