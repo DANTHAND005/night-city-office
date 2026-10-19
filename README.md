@@ -2,6 +2,8 @@
 
 A local dashboard where a Claude "lead" plans and reviews work for a crew of local AI models, then applies the accepted work into Roblox Studio, Blender and Figma. It was built to make the Roblox game **Re:islands** (an "Islands" remake). The dashboard is the tooling; the game lives in Roblox Studio.
 
+![Night City Office dashboard: live 3D office with the agent crew, task board and success stats](docs/screenshots/dashboard.png)
+
 Everything runs on one Windows PC (plus a laptop for two models). Nothing is hosted.
 
 ## What is in this repo
