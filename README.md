@@ -1,5 +1,7 @@
 # Night City Office
 
+**In plain terms:** an AI project manager (Claude) hands work to five small AI models running on my own computers, checks everything they produce, and only then applies it to real tools (Roblox Studio, Blender, Figma). The dashboard shows the crew working live. Built in Python and FastAPI, with Ollama, LiteLLM and MCP. I built it to make a Roblox game, **Re:islands**.
+
 A local dashboard where a Claude "lead" plans and reviews work for a crew of local AI models, then applies the accepted work into Roblox Studio, Blender and Figma. It was built to make the Roblox game **Re:islands** (an "Islands" remake). The dashboard is the tooling; the game lives in Roblox Studio.
 
 ![Night City Office dashboard: live 3D office with the agent crew, task board and success stats](docs/screenshots/dashboard.png)
